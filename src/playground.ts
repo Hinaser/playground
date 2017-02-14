@@ -31,6 +31,8 @@ import {
 import {Example2D, shuffle} from "./dataset";
 import {AppendingLineChart} from "./linechart";
 
+import * as contents from "./additionalcontent";
+
 let mainWidth;
 
 // More scrolling
@@ -353,6 +355,11 @@ function makeGUI() {
     reset();
   });
   problem.property("value", getKeyFromValue(problems, state.problem));
+
+  // Pause player when toggling playground
+  let togglePlayground = d3.select("#playground-toggler").on("click", function () {
+    player.pause();
+  });
 
   // Add scale to the gradient color map.
   let x = d3.scale.linear().domain([-1, 1]).range([0, 144]);
@@ -937,9 +944,20 @@ function reset(onStartup=false) {
   }
   player.pause();
 
-  let suffix = state.numHiddenLayers !== 1 ? "s" : "";
-  d3.select("#layers-label").text("Hidden layer" + suffix);
   d3.select("#num-layers").text(state.numHiddenLayers);
+
+  if (contents.currentLang() == "ja") {
+    if (state.numHiddenLayers == 0 || state.numHiddenLayers >= 10) {
+      d3.select("#layers-label").text("個の隠し層");
+    }
+    else {
+      d3.select("#layers-label").text("つの隠し層");
+    }
+  }
+  else {
+    let suffix = state.numHiddenLayers !== 1 ? "s" : "";
+    d3.select("#layers-label").text("Hidden layer" + suffix);
+  }
 
   // Make a simple network.
   iter = 0;
@@ -1091,17 +1109,23 @@ function userHasInteracted() {
   if (state.tutorial != null && state.tutorial != '') {
     page = `/v/tutorials/${state.tutorial}`;
   }
-  ga('set', 'page', page);
-  ga('send', 'pageview', {'sessionControl': 'start'});
+  try{
+    ga('set', 'page', page);
+    ga('send', 'pageview', {'sessionControl': 'start'});
+  }
+  catch(e){}
 }
 
 function simulationStarted() {
-  ga('send', {
-    hitType: 'event',
-    eventCategory: 'Starting Simulation',
-    eventAction: parametersChanged ? 'changed' : 'unchanged',
-    eventLabel: state.tutorial == null ? '' : state.tutorial
-  });
+  try{
+    ga('send', {
+      hitType: 'event',
+      eventCategory: 'Starting Simulation',
+      eventAction: parametersChanged ? 'changed' : 'unchanged',
+      eventLabel: state.tutorial == null ? '' : state.tutorial
+    });
+  }
+  catch(e){}
   parametersChanged = false;
 }
 
@@ -1111,3 +1135,6 @@ makeGUI();
 generateData(true);
 reset(true);
 hideControls();
+
+// Additional content
+contents.init(state.lang);
