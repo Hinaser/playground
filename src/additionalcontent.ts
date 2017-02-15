@@ -156,11 +156,20 @@ export function init(lang?: string) {
       }
     });
     
-    // Add menu index
-    let noteBodyLeft: Function = function(){
-      return noteBody.offset().left + noteBody.outerWidth(false)
-    };
-    let indexArea = $("<div>");
+    createIndex(currentLang());
+  });
+}
+
+// Add menu index
+function createIndex(lang: String){
+  let noteBody = $("#additional-content-body");
+  let indexArea = $("#index-part");
+  let noteBodyLeft: Function = function(){
+    return noteBody.offset().left + noteBody.outerWidth(false)
+  };
+  
+  if(indexArea.length < 1){
+    indexArea = $("<div>");
     indexArea.prop("id", "index-part");
     indexArea.css({
       "position": "fixed",
@@ -168,27 +177,10 @@ export function init(lang?: string) {
       "left": noteBodyLeft() + 20,
       "right": 20
     });
-    $("[data-title]").each(function(i, elem){
-      let $elem = $(elem);
-      let title = $elem.text();
-      let url = "#" + $elem.prop("id");
-      let pager = $("<div>");
-      pager.addClass("pager");
-      
-      let data_title = $(elem).data("title");
-      if(typeof data_title == "string" && data_title.length > 0){
-        title = data_title;
-      }
-  
-      pager.html("<a href='" + url + "'>" + title + "</a>");
-      indexArea.append(pager);
-    });
-    noteBody.append(indexArea);
-    
     if($(window).width() - noteBodyLeft() < 140){
       indexArea.css("display", "none");
     }
-    
+  
     $(window).resize(function(){
       indexArea.css({"left": noteBodyLeft() + 20});
       if($(window).width() - noteBodyLeft() < 140){
@@ -198,6 +190,27 @@ export function init(lang?: string) {
         indexArea.css("display", "");
       }
     });
+    
+    noteBody.append(indexArea);
+  }
+  else {
+    indexArea.empty();
+  }
+  
+  $("[data-lang=" + lang +"]" + " [data-title]").each(function(i, elem){
+    let $elem = $(elem);
+    let title = $elem.text();
+    let url = "#" + $elem.prop("id");
+    let pager = $("<div>");
+    pager.addClass("pager");
+    
+    let data_title = $(elem).data("title");
+    if(typeof data_title == "string" && data_title.length > 0){
+      title = data_title;
+    }
+    
+    pager.html("<a href='" + url + "'>" + title + "</a>");
+    indexArea.append(pager);
   });
 }
 
@@ -300,4 +313,6 @@ function switchLanguage(lang: string) {
     textpart_en.addClass("hide");
     textpart_ja.removeClass("hide");
   }
+  
+  createIndex(lang);
 }
