@@ -14,59 +14,9 @@ export function init(lang?: string) {
 
   $(function () {
     let playground = $("#playground-content");
-    let note = $("#additional-content");
-    let noteBody = $("#additional-content-body");
-    let toggleBtn = $("#playground-toggler");
-    let toggleBtnIcon = $("#playground-toggler").find("i");
-    let toggleAnchor = $(".toggle-tensorflowplayground");
     let langButton = $("#lang-selection button");
-    let additionalContentBody = $('#additional-content-body');
 
-    playground.css("visibility", "visible").css("display", "none");
     switchLanguage(lang);
-  
-    /***
-     * Shows/Hides TensorFlow Playground
-     * @param e {Event} eventHandler for click event
-     */
-    function toggleTensorFlowPlayground(e: Event) {
-      if (!playground.is(":visible")) {
-        note.addClass("pushback");
-        noteBody.addClass("hide");
-      }
-
-      playground.toggle("slide", {
-        direction: "down"
-      },
-        function () {
-          if (playground.is(":visible")) {
-            $("#header-bar").removeClass("playground-hidden");
-            toggleBtnIcon.text("expand_more");
-            
-            try{
-              window.dispatchEvent(new Event('resize'));
-            }
-            catch(e){
-              // Todo: Find and write alternative code in case 'dispatchEvent' does not work.
-            }
-          }
-          else {
-            $("#header-bar").addClass("playground-hidden");
-            toggleBtnIcon.text("videogame_asset");
-            note.removeClass("pushback");
-            noteBody.removeClass("hide");
-          }
-        }
-      );
-    }
-  
-    // Bind click event which controls visibility of playground content
-    toggleBtn.on("click", toggleTensorFlowPlayground);
-    toggleAnchor.on("click", function (e: Event) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleTensorFlowPlayground(e);
-    });
   
     /// Change current language in whole site content
     langButton.on("click", function (e) {
@@ -77,148 +27,12 @@ export function init(lang?: string) {
       switchLanguage(selected_lang);
     });
   
-    /// Popup picture depicting backpropagation
-    let backprop_img = $('#img-backprop');
-    let pinned = false;
-    $('#img-backprop').on('click', function(){
-      if(!pinned){
-        let right = window.innerWidth - (additionalContentBody.offset().left + additionalContentBody.width());
-        backprop_img.css({
-          "display": "block",
-          "position": "fixed",
-          "top": 80,
-          "right": right,
-          "width": 700,
-          "border": "1px solid gray",
-          "z-index": "1000",
-          "padding": "0"
-        });
-      }
-      else{
-        backprop_img.css({
-          "display": '',
-          "position": '',
-          "top": '',
-          "right": '',
-          "width": '',
-          "border": '',
-          "z-index": '',
-          "padding": "10px"
-        });
-      }
-      
-      pinned = !pinned;
-    });
-  
-    /// Popup picture depicting backpropagation
-    let regularization_img = $('#img-regularization');
-    let reg_pinned = false;
-    regularization_img.on('click', function(){
-      if(!reg_pinned){
-        let right = window.innerWidth - (additionalContentBody.offset().left + additionalContentBody.width());
-        regularization_img.css({
-          "display": "block",
-          "position": "fixed",
-          "top": 80,
-          "right": right,
-          "width": 400,
-          "border": "1px solid gray",
-          "z-index": "1000",
-          "padding": "0"
-        });
-      }
-      else{
-        regularization_img.css({
-          "display": '',
-          "position": '',
-          "top": '',
-          "right": '',
-          "width": '',
-          "border": '',
-          "z-index": '',
-          "padding": "10px"
-        });
-      }
-  
-      reg_pinned = !reg_pinned;
-    });
-  
-    $("#switch-theme").prop("checked", false);
-    $(".header-logo-invertocat").find("svg").attr("fill", "rgba(0, 0, 0, 0.7)");
-    $("#switch-theme").on("change", function(e){
-      if($(this).prop("checked")){
-        $("body").removeClass("white");
-        $(".header-logo-invertocat").find("svg").attr("fill", "rgba(255, 255, 255, 0.7)");
-      }
-      else{
-        $("body").addClass("white");
-        $(".header-logo-invertocat").find("svg").attr("fill", "rgba(0, 0, 0, 0.7)");
-      }
-    });
-    
-    createIndex(currentLang());
-  });
-}
 
-// Add menu index
-function createIndex(lang: String){
-  let noteBody = $("#additional-content-body");
-  let indexArea = $("#index-part");
-  let noteBodyLeft: Function = function(){
-    return noteBody.offset().left + noteBody.outerWidth(false)
-  };
-  
-  if(indexArea.length < 1){
-    indexArea = $("<div>");
-    indexArea.prop("id", "index-part");
-    indexArea.css({
-      "position": "fixed",
-      "top": noteBody.offset().top,
-      "left": noteBodyLeft() + 20,
-      "right": 20
-    });
-    if($(window).width() - noteBodyLeft() < 140){
-      indexArea.css("display", "none");
-    }
-  
-    $(window).resize(function(){
-      indexArea.css({"left": noteBodyLeft() + 20});
-      if($(window).width() - noteBodyLeft() < 140){
-        indexArea.css("display", "none");
-      }
-      else if(indexArea.css("display") == "none") {
-        indexArea.css("display", "");
-      }
-    });
-    
-    noteBody.append(indexArea);
-  }
-  else {
-    indexArea.empty();
-  }
-  
-  $("[data-lang=" + lang +"]" + " [data-title]").each(function(i, elem){
-    let $elem = $(elem);
-    let title = $elem.text();
-    let url = "#" + $elem.prop("id");
-    let pager = $("<div>");
-    pager.addClass("pager");
-    
-    let data_title = $(elem).data("title");
-    if(typeof data_title == "string" && data_title.length > 0){
-      title = data_title;
-    }
-    
-    pager.html("<a href='" + url + "'>" + title + "</a>");
-    indexArea.append(pager);
   });
 }
 
 function switchLanguage(lang: string) {
   if (lang != "ja" && lang != "en") return;
-
-  let textpart_en = $("#additional-content-body .text-content[data-lang='en']");
-  let textpart_ja = $("#additional-content-body .text-content[data-lang='ja']");
 
   if (lang == "en") {
     $("[data-i18n='toggleplaygroundvisibility']").text("Click this button to toggle playground visible/hidden.");
@@ -260,9 +74,6 @@ function switchLanguage(lang: string) {
     $("[data-i18n='colorsshowsdata']").text(" Colors shows data, neuron and weight values.");
     $("[data-i18n='showtestdata']").text("Show test data");
     $("[data-i18n='discretizeoutput']").text("Discretize output");
-
-    textpart_en.removeClass("hide");
-    textpart_ja.addClass("hide");
   }
   else if (lang == "ja") {
     $("[data-i18n='toggleplaygroundvisibility']").text("デモの非表示/表示を切り替えられます。");
@@ -309,10 +120,5 @@ function switchLanguage(lang: string) {
     $("[data-i18n='colorsshowsdata']").text("データやニューロン、重みの値は色で表現されます。");
     $("[data-i18n='showtestdata']").text("テストデータを表示する");
     $("[data-i18n='discretizeoutput']").text("出力を離散化する");
-
-    textpart_en.addClass("hide");
-    textpart_ja.removeClass("hide");
   }
-  
-  createIndex(lang);
 }
